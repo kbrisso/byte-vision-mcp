@@ -251,3 +251,5 @@ go test ./...
 - Check the individual README files in each subdirectory for specific setup instructions
 - Review logs for detailed error information
 - Ensure all paths in configuration are absolute and accessible
+
+Kevin Brisson - LinkedIn - kbrisso@gmail.com Project Link: https://github.com/kbrisso/byte-vision-mcp
