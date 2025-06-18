@@ -1,6 +1,6 @@
 # Byte Vision MCP
 
-A Model Context Protocol (MCP) server that provides text completion capabilities using local LLama.cpp models. This server exposes a single MCP tool that accepts text prompts and returns AI-generated completions using locally-hosted language models.
+A Model Context Protocol (MCP) server that provides text completion capabilities using local LLama.cpp models. This server exposes a single MCP tool that accepts text prompts and returns AI-generated completions using locally hosted language models.
 
 ## What is this project?
 
@@ -21,6 +21,24 @@ Byte Vision MCP is a bridge between MCP-compatible clients (like Claude Desktop,
 - **Prompt Caching**: Built-in caching for improved performance
 - **Comprehensive Logging**: Detailed logging for debugging and monitoring
 - **Graceful Shutdown**: Proper resource cleanup and error handling
+- 
+## Built With
+
+### Core Dependencies
+
+- **[github.com/joho/godotenv](https://github.com/joho/godotenv) v1.5.1** - Environment variable loading from `.env` files
+- **[github.com/metoro-io/mcp-golang](https://github.com/metoro-io/mcp-golang) v0.12.0** - Model Context Protocol (MCP) implementation for Go
+
+### Indirect Dependencies
+
+#### Web Framework & HTTP
+- **[github.com/gin-gonic/gin](https://github.com/gin-gonic/gin) v1.8.1** - HTTP web framework
+- **[github.com/gin-contrib/sse](https://github.com/gin-contrib/sse) v0.1.0** - Server-Sent Events support
+
+### Runtime Requirements
+- **Go SDK 1.23+** - Modern Go runtime with latest features
+- **LLama.cpp** - Local language model inference engine
+- **GGUF Models** - Quantized language models in GGUF format
 
 ## Prerequisites
 
@@ -60,7 +78,6 @@ Copy the example configuration:
 cp example-byte-vision-cfg.env byte-vision-cfg.env
 ```
 
-
 Edit `byte-vision-cfg.env` to match your setup:
 ```
 # Update paths to match your installation
@@ -68,14 +85,11 @@ LLamaCliPath=/path/to/your/llama-cli
 ModelFullPathVal=/path/to/your/model.gguf
 AppLogPath=/path/to/logs/
 ```
-
-
 ### 5. Run the Server
 
 ```shell script
 ./byte-vision-mcp
 ```
-
 
 The server will start on `http://localhost:8080/mcp-completion` by default.
 
@@ -93,7 +107,6 @@ byte-vision-mcp/
 ├── byte-vision-cfg.env # Your configuration (create from example)
 └── example-byte-vision-cfg.env # Example configuration
 ```
-
 
 ## Configuration
 
@@ -141,7 +154,6 @@ The server exposes a single MCP tool that accepts:
 }
 ```
 
-
 ### Example with MCP Client
 
 ```javascript
@@ -151,7 +163,6 @@ const result = await mcpClient.callTool("generate_completion", {
 });
 console.log(result.content[0].text);
 ```
-
 
 ## GPU Acceleration
 

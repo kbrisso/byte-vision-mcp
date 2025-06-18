@@ -1,3 +1,6 @@
+// Package main contains type definitions and configuration parsing for the
+// Byte Vision MCP server, including LLama.cpp argument structures and
+// environment variable parsing functions.
 package main
 
 import (
@@ -5,101 +8,157 @@ import (
 	"strconv"
 )
 
+// ParseDefaultLlamaCliEnv parses all LLama.cpp related environment variables
+// and returns a populated LlamaCliArgs struct with all command-line options.
+//
+// Returns:
+//   - LlamaCliArgs: Struct containing all parsed LLama.cpp configuration
 func ParseDefaultLlamaCliEnv() LlamaCliArgs {
 	out := LlamaCliArgs{
-		ModelCmd:                 os.Getenv("ModelCmd"),
-		ModelFullPathVal:         os.Getenv("ModelFullPathVal"),
-		PromptCmd:                os.Getenv("PromptCmd"),
-		PromptCmdEnabled:         getEnvBool(os.Getenv("PromptCmdEnabled"), false),
-		PromptText:               os.Getenv("PromptText"),
+		// Model configuration
+		ModelCmd:         os.Getenv("ModelCmd"),
+		ModelFullPathVal: os.Getenv("ModelFullPathVal"),
+
+		// Prompt configuration
+		PromptCmd:        os.Getenv("PromptCmd"),
+		PromptCmdEnabled: getEnvBool(os.Getenv("PromptCmdEnabled"), false),
+		PromptText:       os.Getenv("PromptText"),
+
+		// Chat and input configuration
 		ChatTemplateCmd:          os.Getenv("ChatTemplateCmd"),
 		ChatTemplateVal:          os.Getenv("ChatTemplateVal"),
 		MultilineInputCmd:        os.Getenv("MultilineInputCmd"),
 		MultilineInputCmdEnabled: getEnvBool(os.Getenv("MultilineInputCmdEnabled"), false),
-		CtxSizeCmd:               os.Getenv("CtxSizeCmd"),
-		CtxSizeVal:               os.Getenv("CtxSizeVal"),
-		RopeScalingCmd:           os.Getenv("RopeScalingCmd"),
-		RopeScalingCmdVal:        os.Getenv("RopeScalingCmdVal"),
-		RopeScaleCmd:             os.Getenv("RopeScaleCmd"),
-		RopeScaleVal:             os.Getenv("RopeScaleVal"),
-		PromptCacheAllCmd:        os.Getenv("PromptCacheAllCmd"),
-		PromptCacheCmd:           os.Getenv("PromptCacheCmd"),
-		PromptCacheVal:           os.Getenv("PromptCacheVal"),
-		PromptFileCmd:            os.Getenv("PromptFileCmd"),
-		PromptFileVal:            os.Getenv("PromptFileVal"),
-		ReversePromptCmd:         os.Getenv("ReversePromptCmd"),
-		ReversePromptVal:         os.Getenv("ReversePromptVal"),
-		InPrefixCmd:              os.Getenv("InPrefixCmd"),
-		InPrefixVal:              os.Getenv("InPrefixVal"),
-		InSuffixCmd:              os.Getenv("InSuffixCmd"),
-		InSuffixVal:              os.Getenv("InSuffixVal"),
-		GPULayersCmd:             os.Getenv("GPULayersCmd"),
-		GPULayersVal:             os.Getenv("GPULayersVal"),
-		ThreadsBatchCmd:          os.Getenv("ThreadsBatchCmd"),
-		ThreadsBatchVal:          os.Getenv("ThreadsBatchVal"),
-		ThreadsCmd:               os.Getenv("ThreadsCmd"),
-		ThreadsVal:               os.Getenv("ThreadsVal"),
-		KeepCmd:                  os.Getenv("KeepCmd"),
-		KeepVal:                  os.Getenv("KeepVal"),
-		TopKCmd:                  os.Getenv("TopKCmd"),
-		TopKVal:                  os.Getenv("TopKVal"),
-		MainGPUCmd:               os.Getenv("MainGPUCmd"),
-		MainGPUVal:               os.Getenv("MainGPUVal"),
-		RepeatPenaltyCmd:         os.Getenv("RepeatPenaltyCmd"),
-		RepeatPenaltyVal:         os.Getenv("RepeatPenaltyVal"),
-		RepeatLastPenaltyCmd:     os.Getenv("RepeatLastPenaltyCmd"),
-		RepeatLastPenaltyVal:     os.Getenv("RepeatLastPenaltyVal"),
+
+		// Context and scaling configuration
+		CtxSizeCmd:        os.Getenv("CtxSizeCmd"),
+		CtxSizeVal:        os.Getenv("CtxSizeVal"),
+		RopeScalingCmd:    os.Getenv("RopeScalingCmd"),
+		RopeScalingCmdVal: os.Getenv("RopeScalingCmdVal"),
+		RopeScaleCmd:      os.Getenv("RopeScaleCmd"),
+		RopeScaleVal:      os.Getenv("RopeScaleVal"),
+
+		// Caching configuration
+		PromptCacheAllCmd: os.Getenv("PromptCacheAllCmd"),
+		PromptCacheCmd:    os.Getenv("PromptCacheCmd"),
+		PromptCacheVal:    os.Getenv("PromptCacheVal"),
+
+		// File and prompt handling
+		PromptFileCmd:    os.Getenv("PromptFileCmd"),
+		PromptFileVal:    os.Getenv("PromptFileVal"),
+		ReversePromptCmd: os.Getenv("ReversePromptCmd"),
+		ReversePromptVal: os.Getenv("ReversePromptVal"),
+		InPrefixCmd:      os.Getenv("InPrefixCmd"),
+		InPrefixVal:      os.Getenv("InPrefixVal"),
+		InSuffixCmd:      os.Getenv("InSuffixCmd"),
+		InSuffixVal:      os.Getenv("InSuffixVal"),
+
+		// GPU and threading configuration
+		GPULayersCmd:    os.Getenv("GPULayersCmd"),
+		GPULayersVal:    os.Getenv("GPULayersVal"),
+		ThreadsBatchCmd: os.Getenv("ThreadsBatchCmd"),
+		ThreadsBatchVal: os.Getenv("ThreadsBatchVal"),
+		ThreadsCmd:      os.Getenv("ThreadsCmd"),
+		ThreadsVal:      os.Getenv("ThreadsVal"),
+
+		// Generation parameters
+		KeepCmd:              os.Getenv("KeepCmd"),
+		KeepVal:              os.Getenv("KeepVal"),
+		TopKCmd:              os.Getenv("TopKCmd"),
+		TopKVal:              os.Getenv("TopKVal"),
+		MainGPUCmd:           os.Getenv("MainGPUCmd"),
+		MainGPUVal:           os.Getenv("MainGPUVal"),
+		RepeatPenaltyCmd:     os.Getenv("RepeatPenaltyCmd"),
+		RepeatPenaltyVal:     os.Getenv("RepeatPenaltyVal"),
+		RepeatLastPenaltyCmd: os.Getenv("RepeatLastPenaltyCmd"),
+		RepeatLastPenaltyVal: os.Getenv("RepeatLastPenaltyVal"),
+
+		// Memory and system configuration
 		MemLockCmd:               os.Getenv("MemLockCmd"),
 		MemLockCmdEnabled:        getEnvBool(os.Getenv("MemLockCmdEnabled"), false),
 		EscapeNewLinesCmd:        os.Getenv("EscapeNewLinesCmd"),
 		EscapeNewLinesCmdEnabled: getEnvBool(os.Getenv("EscapeNewLinesCmdEnabled"), false),
-		LogVerboseCmd:            os.Getenv("LogVerboseCmd"),
-		LogVerboseEnabled:        getEnvBool(os.Getenv("LogVerboseEnabled"), false),
-		TemperatureVal:           os.Getenv("TemperatureVal"),
-		TemperatureCmd:           os.Getenv("TemperatureCmd"),
-		PredictCmd:               os.Getenv("PredictCmd"),
-		PredictVal:               os.Getenv("PredictVal"),
-		NoDisplayPromptCmd:       os.Getenv("NoDisplayPromptCmd"),
-		NoDisplayPromptEnabled:   getEnvBool(os.Getenv("NoDisplayPromptEnabled"), false),
-		TopPCmd:                  os.Getenv("TopPCmd"),
-		TopPVal:                  os.Getenv("TopPVal"),
-		MinPCmd:                  os.Getenv("MinPCmd"),
-		MinPVal:                  os.Getenv("MinPVal"),
-		ModelLogFileCmd:          os.Getenv("ModelLogFileCmd"),
-		ModelLogFileNameVal:      os.Getenv("ModelLogFileNameVal"),
+
+		// Logging and debugging
+		LogVerboseCmd:     os.Getenv("LogVerboseCmd"),
+		LogVerboseEnabled: getEnvBool(os.Getenv("LogVerboseEnabled"), false),
+
+		// Sampling parameters
+		TemperatureVal: os.Getenv("TemperatureVal"),
+		TemperatureCmd: os.Getenv("TemperatureCmd"),
+		PredictCmd:     os.Getenv("PredictCmd"),
+		PredictVal:     os.Getenv("PredictVal"),
+
+		// Display and output configuration
+		NoDisplayPromptCmd:     os.Getenv("NoDisplayPromptCmd"),
+		NoDisplayPromptEnabled: getEnvBool(os.Getenv("NoDisplayPromptEnabled"), false),
+		TopPCmd:                os.Getenv("TopPCmd"),
+		TopPVal:                os.Getenv("TopPVal"),
+		MinPCmd:                os.Getenv("MinPCmd"),
+		MinPVal:                os.Getenv("MinPVal"),
+
+		// Logging configuration
+		ModelLogFileCmd:     os.Getenv("ModelLogFileCmd"),
+		ModelLogFileNameVal: os.Getenv("ModelLogFileNameVal"),
+
+		// Advanced features
 		FlashAttentionCmd:        os.Getenv("FlashAttentionCmd"),
 		FlashAttentionCmdEnabled: getEnvBool(os.Getenv("FlashAttentionCmdEnabled"), false),
 		NoConversationCmd:        os.Getenv("NoConversationCmd"),
 		NoConversationCmdEnabled: getEnvBool(os.Getenv("NoConversationCmdEnabled"), false),
 		NoContextShiftCmd:        os.Getenv("NoContextShiftCmd"),
 		NoContextShiftCmdEnabled: getEnvBool(os.Getenv("NoContextShiftCmdEnabled"), false),
-		RandomSeedCmd:            os.Getenv("RandomSeedCmd"),
-		RandomSeedCmdVal:         os.Getenv("RandomSeedCmdVal"),
-		YarnOrigContextCmd:       os.Getenv("YarnOrigContextCmd"),
-		YarnOrigContextCmdVal:    os.Getenv("YarnOrigContextCmdVal"),
-		BatchCmd:                 os.Getenv("BatchCmd"),
-		BatchCmdVal:              os.Getenv("BatchCmdVal"),
-		UBatchCmd:                os.Getenv("UBatchCmd"),
-		UBatchCmdVal:             os.Getenv("UBatchCmdVal"),
-		SplitModeCmd:             os.Getenv("SplitModeCmd"),
-		SplitModeCmdVal:          os.Getenv("SplitModeCmdVal"),
+
+		// Advanced parameters
+		RandomSeedCmd:         os.Getenv("RandomSeedCmd"),
+		RandomSeedCmdVal:      os.Getenv("RandomSeedCmdVal"),
+		YarnOrigContextCmd:    os.Getenv("YarnOrigContextCmd"),
+		YarnOrigContextCmdVal: os.Getenv("YarnOrigContextCmdVal"),
+
+		// Batch processing configuration
+		BatchCmd:     os.Getenv("BatchCmd"),
+		BatchCmdVal:  os.Getenv("BatchCmdVal"),
+		UBatchCmd:    os.Getenv("UBatchCmd"),
+		UBatchCmdVal: os.Getenv("UBatchCmdVal"),
+
+		// Model splitting configuration
+		SplitModeCmd:    os.Getenv("SplitModeCmd"),
+		SplitModeCmdVal: os.Getenv("SplitModeCmdVal"),
 	}
 	return out
 }
 
+// ParseDefaultAppEnv parses application-level environment variables
+// and returns a populated DefaultAppArgs struct with general app configuration.
+//
+// Returns:
+//   - DefaultAppArgs: Struct containing all parsed application configuration
 func ParseDefaultAppEnv() DefaultAppArgs {
 	out := DefaultAppArgs{
+		// Path configurations
 		ModelPath:       os.Getenv("ModelPath"),
 		AppLogPath:      os.Getenv("AppLogPath"),
 		AppLogFileName:  os.Getenv("AppLogFileName"),
 		LLamaCliPath:    os.Getenv("LLamaCliPath"),
 		PromptCachePath: os.Getenv("PromptCachePath"),
-		HttpPort:        os.Getenv("HttpPort"),
-		EndPoint:        os.Getenv("EndPoint"),
-		TimeOutSeconds:  getEnvInt("TimeOutSeconds", 300),
+
+		// Server configuration
+		HttpPort:       os.Getenv("HttpPort"),
+		EndPoint:       os.Getenv("EndPoint"),
+		TimeOutSeconds: getEnvInt("TimeOutSeconds", 300),
 	}
 	return out
 }
+
+// getEnvInt parses an environment variable as an integer with a fallback value.
+// If the environment variable is empty or cannot be parsed, returns the fallback.
+//
+// Parameters:
+//   - key: The environment variable name to parse
+//   - fallback: The default value to return if parsing fails
+//
+// Returns:
+//   - int: The parsed integer value or fallback
 func getEnvInt(key string, fallback int) int {
 	if val := os.Getenv(key); val != "" {
 		if intVal, err := strconv.Atoi(val); err == nil {
@@ -108,7 +167,23 @@ func getEnvInt(key string, fallback int) int {
 	}
 	return fallback
 }
+
+// getEnvBool parses an environment variable as a boolean with a fallback value.
+// Accepts standard boolean representations: "true", "false", "1", "0", etc.
+//
+// Parameters:
+//   - key: The environment variable value to parse (not the key name)
+//   - fallback: The default value to return if parsing fails
+//
+// Returns:
+//   - bool: The parsed boolean value or fallback
 func getEnvBool(key string, fallback bool) bool {
+	// Return fallback if the value is empty
+	if key == "" {
+		return fallback
+	}
+
+	// Parse the boolean value
 	result, err := strconv.ParseBool(key)
 	if err != nil {
 		return fallback
@@ -117,152 +192,254 @@ func getEnvBool(key string, fallback bool) bool {
 	return result
 }
 
+// LlamaCliStructToArgs converts a LlamaCliArgs struct into a string slice
+// suitable for passing as command-line arguments to llama-cli.
+// Only includes arguments that have non-empty values or enabled flags.
+//
+// Parameters:
+//   - args: The LlamaCliArgs struct containing all configuration
+//
+// Returns:
+//   - []string: Array of command-line arguments for llama-cli
 func LlamaCliStructToArgs(args LlamaCliArgs) []string {
 	var result []string
-	// Helper function for NullString pairs
+
+	// Helper function to add command-value pairs when value is not empty
 	addCmdValPair := func(cmd string, val string) {
 		if len(val) != 0 {
 			result = append(result, cmd, val)
 		}
 	}
-	// Helper function for NullString and NullBool pairs
+
+	// Helper function to add command flags when boolean is true
 	addCmdBoolPair := func(cmd string, val bool) {
 		if val == true {
-			// Convert boolean to string before adding it to the result
 			result = append(result, cmd)
 		}
 	}
-	// Examples of using the helper functions
+
+	// Model and basic configuration
 	addCmdValPair(args.ModelCmd, args.ModelFullPathVal)
 	addCmdValPair(args.PromptCmd, args.PromptText)
 	addCmdValPair(args.ChatTemplateCmd, args.ChatTemplateVal)
 	addCmdBoolPair(args.MultilineInputCmd, args.MultilineInputCmdEnabled)
+
+	// Context and scaling parameters
 	addCmdValPair(args.CtxSizeCmd, args.CtxSizeVal)
 	addCmdValPair(args.RopeScaleCmd, args.RopeScaleVal)
+	addCmdValPair(args.RopeScalingCmd, args.RopeScalingCmdVal)
+
+	// Caching configuration
 	addCmdValPair(args.PromptCacheCmd, args.PromptCacheVal)
+
+	// File and prompt handling
 	addCmdValPair(args.PromptFileCmd, args.PromptFileVal)
 	addCmdValPair(args.ReversePromptCmd, args.ReversePromptVal)
 	addCmdValPair(args.InPrefixCmd, args.InPrefixVal)
 	addCmdValPair(args.InSuffixCmd, args.InSuffixVal)
+
+	// GPU and performance configuration
 	addCmdValPair(args.GPULayersCmd, args.GPULayersVal)
 	addCmdValPair(args.ThreadsBatchCmd, args.ThreadsBatchVal)
 	addCmdValPair(args.ThreadsCmd, args.ThreadsVal)
+	addCmdValPair(args.MainGPUCmd, args.MainGPUVal)
+
+	// Generation parameters
 	addCmdValPair(args.KeepCmd, args.KeepVal)
 	addCmdValPair(args.TopKCmd, args.TopKVal)
-	addCmdValPair(args.MainGPUCmd, args.MainGPUVal)
 	addCmdValPair(args.RepeatPenaltyCmd, args.RepeatPenaltyVal)
 	addCmdValPair(args.RepeatLastPenaltyCmd, args.RepeatLastPenaltyVal)
+
+	// System configuration flags
 	addCmdBoolPair(args.MemLockCmd, args.MemLockCmdEnabled)
 	addCmdBoolPair(args.EscapeNewLinesCmd, args.EscapeNewLinesCmdEnabled)
+
+	// Sampling and generation parameters
 	addCmdValPair(args.TemperatureCmd, args.TemperatureVal)
 	addCmdValPair(args.PredictCmd, args.PredictVal)
-	addCmdValPair(args.ModelLogFileCmd, args.ModelLogFileNameVal)
-	addCmdBoolPair(args.NoDisplayPromptCmd, args.NoDisplayPromptEnabled)
 	addCmdValPair(args.TopPCmd, args.TopPVal)
 	addCmdValPair(args.MinPCmd, args.MinPVal)
+
+	// Logging and output configuration
+	addCmdValPair(args.ModelLogFileCmd, args.ModelLogFileNameVal)
+	addCmdBoolPair(args.NoDisplayPromptCmd, args.NoDisplayPromptEnabled)
 	addCmdBoolPair(args.LogVerboseCmd, args.LogVerboseEnabled)
+
+	// Advanced features and optimizations
 	addCmdBoolPair(args.FlashAttentionCmd, args.FlashAttentionCmdEnabled)
 	addCmdBoolPair(args.NoConversationCmd, args.NoConversationCmdEnabled)
 	addCmdBoolPair(args.NoContextShiftCmd, args.NoContextShiftCmdEnabled)
-	addCmdValPair(args.RopeScalingCmd, args.RopeScalingCmdVal)
+
+	// Advanced parameters
 	addCmdValPair(args.RandomSeedCmd, args.RandomSeedCmdVal)
 	addCmdValPair(args.YarnOrigContextCmd, args.YarnOrigContextCmdVal)
+
+	// Batch processing configuration
 	addCmdValPair(args.BatchCmd, args.BatchCmdVal)
 	addCmdValPair(args.UBatchCmd, args.UBatchCmdVal)
 	addCmdValPair(args.SplitModeCmd, args.SplitModeCmdVal)
+
 	return result
-
 }
 
+// LlamaCliArgs contains all possible command-line arguments and flags
+// that can be passed to the llama-cli executable for model inference.
 type LlamaCliArgs struct {
-	PromptCmd                string `json:"PromptCmd"`
-	PromptCmdEnabled         bool   `json:"PromptCmdEnabled"`
-	ChatTemplateCmd          string `json:"ChatTemplateCmd"`
-	ChatTemplateVal          string `json:"ChatTemplateVal"`
-	MultilineInputCmd        string `json:"MultilineInputCmd"`
-	MultilineInputCmdEnabled bool   `json:"MultilineInputCmdEnabled"`
-	CtxSizeCmd               string `json:"CtxSizeCmd"`
-	CtxSizeVal               string `json:"CtxSizeVal"`
-	RopeScaleVal             string `json:"RopeScaleVal"`
-	RopeScaleCmd             string `json:"RopeScaleCmd"`
-	PromptCacheAllCmd        string `json:"PromptCacheAllCmd"`
-	PromptCacheAllEnabled    bool   `json:"PromptCacheAllEnabled"`
-	PromptCacheCmd           string `json:"PromptCacheCmd"`
-	PromptCacheVal           string `json:"PromptCacheVal"`
-	PromptFileCmd            string `json:"PromptFileCmd"`
-	PromptFileVal            string `json:"PromptFileVal"`
-	ReversePromptCmd         string `json:"ReversePromptCmd"`
-	ReversePromptVal         string `json:"ReversePromptVal"`
-	InPrefixCmd              string `json:"InPrefixCmd"`
-	InPrefixVal              string `json:"InPrefixVal"`
-	InSuffixCmd              string `json:"InSuffixCmd"`
-	InSuffixVal              string `json:"InSuffixVal"`
-	GPULayersCmd             string `json:"GPULayersCmd"`
-	GPULayersVal             string `json:"GPULayersVal"`
-	ThreadsBatchCmd          string `json:"ThreadsBatchCmd"`
-	ThreadsBatchVal          string `json:"ThreadsBatchVal"`
-	ThreadsCmd               string `json:"ThreadsCmd"`
-	ThreadsVal               string `json:"ThreadsVal"`
-	KeepCmd                  string `json:"KeepCmd"`
-	KeepVal                  string `json:"KeepVal"`
-	TopKCmd                  string `json:"TopKCmd"`
-	TopKVal                  string `json:"TopKVal"`
-	MainGPUCmd               string `json:"MainGPUCmd"`
-	MainGPUVal               string `json:"MainGPUVal"`
-	RepeatPenaltyCmd         string `json:"RepeatPenaltyCmd"`
-	RepeatPenaltyVal         string `json:"RepeatPenaltyVal"`
-	RepeatLastPenaltyCmd     string `json:"RepeatLastPenaltyCmd"`
-	RepeatLastPenaltyVal     string `json:"RepeatLastPenaltyVal"`
-	MemLockCmd               string `json:"MemLockCmd"`
-	MemLockCmdEnabled        bool   `json:"MemLockCmdEnabled"`
-	NoMMApCmd                string `json:"NoMMApCmd"`
-	NoMMApCmdEnabled         bool   `json:"NoMMApCmdEnabled"`
-	EscapeNewLinesCmd        string `json:"EscapeNewLinesCmd"`
-	EscapeNewLinesCmdEnabled bool   `json:"EscapeNewLinesCmdEnabled"`
-	LogVerboseCmd            string `json:"LogVerboseCmd"`
-	LogVerboseEnabled        bool   `json:"LogVerboseEnabled"`
-	TemperatureVal           string `json:"TemperatureVal"`
-	TemperatureCmd           string `json:"TemperatureCmd"`
-	PredictCmd               string `json:"PredictCmd"`
-	PredictVal               string `json:"PredictVal"`
-	ModelFullPathVal         string `json:"ModelFullPathVal"`
-	ModelCmd                 string `json:"ModelCmd"`
-	PromptText               string `json:"PromptText"`
-	NoDisplayPromptCmd       string `json:"NoDisplayPromptCmd"`
-	NoDisplayPromptEnabled   bool   `json:"NoDisplayPromptEnabled"`
-	TopPCmd                  string `json:"TopPCmd"`
-	TopPVal                  string `json:"TopPVal"`
-	MinPCmd                  string `json:"MinPCmd"`
-	MinPVal                  string `json:"MinPVal"`
-	ModelLogFileCmd          string `json:"ModelLogFileCmd"`
-	ModelLogFileNameVal      string `json:"ModelLogFileNameVal"`
-	FlashAttentionCmd        string `json:"FlashAttentionCmd"`
-	FlashAttentionCmdEnabled bool   `json:"FlashAttentionCmdEnabled"`
-	NoConversationCmd        string `json:"NoConversationCmd"`
-	NoConversationCmdEnabled bool   `json:"NoConversationCmdEnabled"`
-	NoContextShiftCmd        string `json:"NoContextShiftCmd"`
-	NoContextShiftCmdEnabled bool   `json:"NoContextShiftCmdEnabled"`
-	RopeScalingCmd           string `json:"RopeScalingCmd"`
-	RopeScalingCmdVal        string `json:"RopeScalingCmdVal"`
-	RandomSeedCmd            string `json:"RandomSeedCmd"`
-	RandomSeedCmdVal         string `json:"RandomSeedCmdVal"`
-	YarnOrigContextCmd       string `json:"YarnOrigContextCmd"`
-	YarnOrigContextCmdVal    string `json:"YarnOrigContextCmdVal"`
-	BatchCmd                 string `json:"BatchCmd"`
-	BatchCmdVal              string `json:"BatchCmdVal"`
-	UBatchCmd                string `json:"UBatchCmd"`
-	UBatchCmdVal             string `json:"UBatchCmdVal"`
-	SplitModeCmd             string `json:"SplitModeCmd"`
-	SplitModeCmdVal          string `json:"SplitModeCmdVal"`
+	// Basic prompt configuration
+	PromptCmd        string `json:"PromptCmd"`        // Command flag for prompt input (--prompt)
+	PromptCmdEnabled bool   `json:"PromptCmdEnabled"` // Whether to enable prompt command
+	PromptText       string `json:"PromptText"`       // The actual prompt text content
+
+	// Chat template configuration
+	ChatTemplateCmd string `json:"ChatTemplateCmd"` // Command flag for chat template (--chat-template)
+	ChatTemplateVal string `json:"ChatTemplateVal"` // Chat template format string
+
+	// Input handling configuration
+	MultilineInputCmd        string `json:"MultilineInputCmd"`        // Command flag for multiline input (--multiline-input)
+	MultilineInputCmdEnabled bool   `json:"MultilineInputCmdEnabled"` // Whether to enable multiline input
+
+	// Context window configuration
+	CtxSizeCmd string `json:"CtxSizeCmd"` // Command flag for context size (--ctx-size)
+	CtxSizeVal string `json:"CtxSizeVal"` // Context window size value
+
+	// RoPE scaling configuration for extended context
+	RopeScaleCmd string `json:"RopeScaleCmd"` // Command flag for RoPE scale (--rope-scale)
+	RopeScaleVal string `json:"RopeScaleVal"` // RoPE scale factor value
+
+	// Advanced RoPE scaling configuration
+	RopeScalingCmd    string `json:"RopeScalingCmd"`    // Command flag for RoPE scaling type
+	RopeScalingCmdVal string `json:"RopeScalingCmdVal"` // RoPE scaling type value
+
+	// Prompt caching configuration
+	PromptCacheAllCmd     string `json:"PromptCacheAllCmd"`     // Command flag for cache all prompts
+	PromptCacheAllEnabled bool   `json:"PromptCacheAllEnabled"` // Whether to enable cache all prompts
+	PromptCacheCmd        string `json:"PromptCacheCmd"`        // Command flag for prompt cache (--prompt-cache)
+	PromptCacheVal        string `json:"PromptCacheVal"`        // Prompt cache file path
+
+	// File input configuration
+	PromptFileCmd string `json:"PromptFileCmd"` // Command flag for prompt file input (--file)
+	PromptFileVal string `json:"PromptFileVal"` // Prompt file path
+
+	// Reverse prompt configuration for interactive mode
+	ReversePromptCmd string `json:"ReversePromptCmd"` // Command flag for reverse prompt (--reverse-prompt)
+	ReversePromptVal string `json:"ReversePromptVal"` // Reverse prompt text
+
+	// Input formatting configuration
+	InPrefixCmd string `json:"InPrefixCmd"` // Command flag for input prefix (--in-prefix)
+	InPrefixVal string `json:"InPrefixVal"` // Input prefix text
+	InSuffixCmd string `json:"InSuffixCmd"` // Command flag for input suffix (--in-suffix)
+	InSuffixVal string `json:"InSuffixVal"` // Input suffix text
+
+	// GPU acceleration configuration
+	GPULayersCmd string `json:"GPULayersCmd"` // Command flag for GPU layers (--n-gpu-layers)
+	GPULayersVal string `json:"GPULayersVal"` // Number of layers to offload to GPU
+
+	// Threading configuration
+	ThreadsBatchCmd string `json:"ThreadsBatchCmd"` // Command flag for batch threads (--threads-batch)
+	ThreadsBatchVal string `json:"ThreadsBatchVal"` // Number of threads for batch processing
+	ThreadsCmd      string `json:"ThreadsCmd"`      // Command flag for threads (--threads)
+	ThreadsVal      string `json:"ThreadsVal"`      // Number of threads for inference
+
+	// Context management configuration
+	KeepCmd string `json:"KeepCmd"` // Command flag for keep tokens (--keep)
+	KeepVal string `json:"KeepVal"` // Number of tokens to keep in context
+
+	// Sampling parameters
+	TopKCmd string `json:"TopKCmd"` // Command flag for top-k sampling (--top-k)
+	TopKVal string `json:"TopKVal"` // Top-k sampling value
+
+	// Multi-GPU configuration
+	MainGPUCmd string `json:"MainGPUCmd"` // Command flag for main GPU (--main-gpu)
+	MainGPUVal string `json:"MainGPUVal"` // Main GPU index
+
+	// Repetition penalty configuration
+	RepeatPenaltyCmd     string `json:"RepeatPenaltyCmd"`     // Command flag for repeat penalty (--repeat-penalty)
+	RepeatPenaltyVal     string `json:"RepeatPenaltyVal"`     // Repeat penalty value
+	RepeatLastPenaltyCmd string `json:"RepeatLastPenaltyCmd"` // Command flag for repeat last n (--repeat-last-n)
+	RepeatLastPenaltyVal string `json:"RepeatLastPenaltyVal"` // Number of last tokens to consider for penalty
+
+	// Memory management configuration
+	MemLockCmd        string `json:"MemLockCmd"`        // Command flag for memory lock (--mlock)
+	MemLockCmdEnabled bool   `json:"MemLockCmdEnabled"` // Whether to enable memory locking
+
+	// Memory mapping configuration (unused in current implementation)
+	NoMMApCmd        string `json:"NoMMApCmd"`        // Command flag for no memory mapping
+	NoMMApCmdEnabled bool   `json:"NoMMApCmdEnabled"` // Whether to disable memory mapping
+
+	// Output formatting configuration
+	EscapeNewLinesCmd        string `json:"EscapeNewLinesCmd"`        // Command flag for escape newlines (-e)
+	EscapeNewLinesCmdEnabled bool   `json:"EscapeNewLinesCmdEnabled"` // Whether to escape newlines in output
+
+	// Debugging configuration
+	LogVerboseCmd     string `json:"LogVerboseCmd"`     // Command flag for verbose logging (--log-verbose)
+	LogVerboseEnabled bool   `json:"LogVerboseEnabled"` // Whether to enable verbose logging
+
+	// Temperature sampling configuration
+	TemperatureVal string `json:"TemperatureVal"` // Temperature value for sampling randomness
+	TemperatureCmd string `json:"TemperatureCmd"` // Command flag for temperature (--temp)
+
+	// Generation length configuration
+	PredictCmd string `json:"PredictCmd"` // Command flag for prediction length (--n-predict)
+	PredictVal string `json:"PredictVal"` // Maximum number of tokens to generate
+
+	// Model configuration
+	ModelFullPathVal string `json:"ModelFullPathVal"` // Full path to the model file
+	ModelCmd         string `json:"ModelCmd"`         // Command flag for model (--model)
+
+	// Display configuration
+	NoDisplayPromptCmd     string `json:"NoDisplayPromptCmd"`     // Command flag for no display prompt (--no-display-prompt)
+	NoDisplayPromptEnabled bool   `json:"NoDisplayPromptEnabled"` // Whether to hide prompt in output
+
+	// Advanced sampling parameters
+	TopPCmd string `json:"TopPCmd"` // Command flag for top-p sampling (--top-p)
+	TopPVal string `json:"TopPVal"` // Top-p (nucleus) sampling value
+	MinPCmd string `json:"MinPCmd"` // Command flag for min-p sampling (--min-p)
+	MinPVal string `json:"MinPVal"` // Min-p sampling value
+
+	// Model logging configuration
+	ModelLogFileCmd     string `json:"ModelLogFileCmd"`     // Command flag for model log file (--log-file)
+	ModelLogFileNameVal string `json:"ModelLogFileNameVal"` // Model log file path
+
+	// Performance optimization features
+	FlashAttentionCmd        string `json:"FlashAttentionCmd"`        // Command flag for flash attention (--flash-attn)
+	FlashAttentionCmdEnabled bool   `json:"FlashAttentionCmdEnabled"` // Whether to enable flash attention
+
+	// Conversation mode configuration
+	NoConversationCmd        string `json:"NoConversationCmd"`        // Command flag for no conversation mode
+	NoConversationCmdEnabled bool   `json:"NoConversationCmdEnabled"` // Whether to disable conversation mode
+
+	// Context shifting configuration
+	NoContextShiftCmd        string `json:"NoContextShiftCmd"`        // Command flag for no context shift
+	NoContextShiftCmdEnabled bool   `json:"NoContextShiftCmdEnabled"` // Whether to disable context shifting
+
+	// Random seed configuration
+	RandomSeedCmd    string `json:"RandomSeedCmd"`    // Command flag for random seed (--seed)
+	RandomSeedCmdVal string `json:"RandomSeedCmdVal"` // Random seed value for reproducible generation
+
+	// YaRN (Yet another RoPE extensioN) configuration
+	YarnOrigContextCmd    string `json:"YarnOrigContextCmd"`    // Command flag for YaRN original context
+	YarnOrigContextCmdVal string `json:"YarnOrigContextCmdVal"` // YaRN original context size
+
+	// Batch processing configuration
+	BatchCmd     string `json:"BatchCmd"`     // Command flag for batch size (--batch-size)
+	BatchCmdVal  string `json:"BatchCmdVal"`  // Batch size for processing
+	UBatchCmd    string `json:"UBatchCmd"`    // Command flag for micro-batch size (--ubatch-size)
+	UBatchCmdVal string `json:"UBatchCmdVal"` // Micro-batch size for processing
+
+	// Model splitting configuration for multi-GPU setups
+	SplitModeCmd    string `json:"SplitModeCmd"`    // Command flag for split mode (--split-mode)
+	SplitModeCmdVal string `json:"SplitModeCmdVal"` // Split mode value (layer, row, etc.)
 }
 
+// DefaultAppArgs contains general application configuration parameters
+// that are not specific to LLama.cpp but control the MCP server behavior.
 type DefaultAppArgs struct {
-	ModelPath       string `json:"ModelPath"`
-	AppLogPath      string `json:"AppLogPath"`
-	AppLogFileName  string `json:"AppLogFileName"`
-	PromptCachePath string `json:"PromptCachePath"`
-	LLamaCliPath    string `json:"LlamaCliPath"`
-	HttpPort        string `json:"HttpPort"`
-	EndPoint        string `json:"EndPoint"`
-	TimeOutSeconds  int    `json:"TimeOutSeconds"`
+	ModelPath       string `json:"ModelPath"`       // Directory path where model files are stored
+	AppLogPath      string `json:"AppLogPath"`      // Directory path for application log files
+	AppLogFileName  string `json:"AppLogFileName"`  // Name of the main application log file
+	PromptCachePath string `json:"PromptCachePath"` // Directory path for prompt cache files
+	LLamaCliPath    string `json:"LlamaCliPath"`    // Full path to the llama-cli executable
+	HttpPort        string `json:"HttpPort"`        // HTTP port for the MCP server (e.g., ":8080")
+	EndPoint        string `json:"EndPoint"`        // HTTP endpoint path for MCP requests (e.g., "/mcp-completion")
+	TimeOutSeconds  int    `json:"TimeOutSeconds"`  // Timeout in seconds for completion requests
 }
