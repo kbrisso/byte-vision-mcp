@@ -21,7 +21,7 @@ Byte Vision MCP is a bridge between MCP-compatible clients (like Claude Desktop,
 - **Prompt Caching**: Built-in caching for improved performance
 - **Comprehensive Logging**: Detailed logging for debugging and monitoring
 - **Graceful Shutdown**: Proper resource cleanup and error handling
-- 
+
 ## Built With
 
 ### Core Dependencies

@@ -84,3 +84,5 @@ LLamaCliPath=/byte-vision-mcp/llamacpp/llama-cli.exe
 - Windows: `/byte-vision-mcp/llamacpp/llama-cli.exe`
 - Linux: `/home/user/llamacpp/llama-cli`
 - macOS: `/usr/local/bin/llama-cli` (if installed via Homebrew)
+
+Kevin Brisson - LinkedIn - kbrisso@gmail.com Project Link: https://github.com/kbrisso/byte-vision-mcp
