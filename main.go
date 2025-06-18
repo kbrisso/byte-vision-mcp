@@ -24,6 +24,16 @@ const (
 	DefaultConfigFile = "byte-vision-cfg.env"
 )
 
+// Add metrics tracking
+type CompletionMetrics struct {
+	RequestCount  int64
+	SuccessCount  int64
+	ErrorCount    int64
+	TimeoutCount  int64
+	TotalDuration time.Duration
+	AverageTokens float64
+}
+
 // Global variables for configuration
 var (
 	llamaCliArgs LlamaCliArgs
@@ -185,6 +195,18 @@ func runServer(ctx context.Context) error {
 
 // handleCompletionTool handles the completion tool requests
 func handleCompletionTool(arguments CompletionArguments) (*mcpgolang.ToolResponse, error) {
+	var metrics CompletionMetrics
+	startTime := time.Now()
+	metrics.RequestCount++
+
+	defer func() {
+		duration := time.Since(startTime)
+		metrics.TotalDuration += duration
+		logger.Printf("Request completed in %v (avg: %v)",
+			duration,
+			time.Duration(int64(metrics.TotalDuration)/metrics.RequestCount))
+	}()
+
 	// Simple check for empty prompt
 	if arguments.Prompt == "" {
 		logger.Println("Empty prompt received")
@@ -195,7 +217,7 @@ func handleCompletionTool(arguments CompletionArguments) (*mcpgolang.ToolRespons
 		}, nil
 	}
 
-	logger.Printf("Handling completion request for prompt: %.50s...", arguments.Prompt)
+	logger.Printf("Handling completion request for prompt: %.100s...", arguments.Prompt)
 
 	// Use timeout from configuration
 	timeoutSeconds := appArgs.TimeOutSeconds
