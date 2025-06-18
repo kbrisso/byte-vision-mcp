@@ -1,2 +1,46 @@
+# Environment configuration
 byte-vision-cfg.env
+*.env
+
+# IDE files
 .idea/
+.vscode/
+*.swp
+*.swo
+
+# Build artifacts
+byte-vision-mcp
+byte-vision-mcp.exe
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Go build cache
+vendor/
+
+# Log files
+logs/
+*.log
+
+# Model files (usually large)
+models/*.gguf
+models/*.bin
+
+# Cache files
+prompt-cache/
+*.cache
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+~*
