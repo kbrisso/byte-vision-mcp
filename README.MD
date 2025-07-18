@@ -66,14 +66,14 @@ go build -o byte-vision-mcp
 
 ### 2. Set Up LLama.cpp
 
-Follow the instructions in to: `/llamacpp/README.md`
+Follow the instructions in: `/llamacpp/README.md`
 
 - Download prebuilt binaries, or
 - Build from source
 
 ### 3. Download Models
 
-See for: `/models/README.md`
+See: `/models/README.md`
 
 - Recommended model sources
 - How to download GGUF models
@@ -82,7 +82,9 @@ See for: `/models/README.md`
 ### 4. Configure Environment
 
 Copy the example configuration:
+```
 cp example-byte-vision-cfg.env byte-vision-cfg.env
+```
 Edit to match your setup: `byte-vision-cfg.env`
 
 # Update paths to match your installation
@@ -91,9 +93,10 @@ LLamaCliPath=/path/to/your/llama-cli
 ModelFullPathVal=/path/to/your/model.gguf
 AppLogPath=/path/to/logs/
 
-### 5. Run the
-
+### 5. Run the Server
+```
 ./byte-vision-mcp
+```
 The server will start on `http://localhost:8080/mcp-completion` by default.
 
 ## Project Structure
