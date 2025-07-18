@@ -468,6 +468,9 @@ This project is licensed under the terms of the MIT license.
 - Ensure all paths in configuration are absolute and accessible
 
 **Author:** Kevin Brisson
+
 **Email:** kbrisso@gmail.com
+
 **LinkedIn:** [Kevin Brisson](https://linkedin.com/in/kevinbrisson)
+
 **Project Link:** [https://github.com/kbrisso/byte-vision-mcp](https://github.com/kbrisso/byte-vision-mcp)
