@@ -11,6 +11,7 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"strconv"
 	"sync"
 	"syscall"
 	"time"
@@ -50,6 +51,24 @@ var (
 // CompletionArguments defines the input structure for the MCP completion tool
 type CompletionArguments struct {
 	Prompt string `json:"prompt" description:"The prompt text to generate completion for"`
+
+	// Core Model & Performance Parameters
+	Model     string `json:"model,omitempty" description:"Model path (overrides default)"`
+	Threads   int    `json:"threads,omitempty" description:"CPU threads for generation"`
+	GpuLayers int    `json:"gpu_layers,omitempty" description:"GPU acceleration layers"`
+	CtxSize   int    `json:"ctx_size,omitempty" description:"Context window size"`
+	BatchSize int    `json:"batch_size,omitempty" description:"Batch processing size"`
+
+	// Generation Control Parameters
+	Predict       int     `json:"predict,omitempty" description:"Number of tokens to generate"`
+	Temperature   float64 `json:"temperature,omitempty" description:"Creativity/randomness control"`
+	TopK          int     `json:"top_k,omitempty" description:"Top-K sampling"`
+	TopP          float64 `json:"top_p,omitempty" description:"Top-P (nucleus) sampling"`
+	RepeatPenalty float64 `json:"repeat_penalty,omitempty" description:"Repetition penalty"`
+
+	// Input/Output Parameters
+	PromptFile string `json:"prompt_file,omitempty" description:"Prompt from file"`
+	LogFile    string `json:"log_file,omitempty" description:"Output logging"`
 }
 
 // setupLogging configures dual logging to both file and console with structured output.
@@ -183,11 +202,7 @@ func runServer(ctx context.Context) error {
 	server := mcpgolang.NewServer(transport)
 
 	// Register the text completion tool with the server
-	if err := server.RegisterTool(
-		"generate_completion",
-		"Generate text completion using the local LLM",
-		handleCompletionTool,
-	); err != nil {
+	if err := server.RegisterTool("generate_completion", "Generate text completion using the local LLM", handleCompletionTool); err != nil {
 		return fmt.Errorf("failed to register completion tool: %w", err)
 	}
 
@@ -232,9 +247,7 @@ func handleCompletionTool(arguments CompletionArguments) (*mcpgolang.ToolRespons
 	defer func() {
 		duration := time.Since(startTime)
 		metrics.TotalDuration += duration
-		logger.Printf("Request completed in %v (avg: %v)",
-			duration,
-			time.Duration(int64(metrics.TotalDuration)/metrics.RequestCount))
+		logger.Printf("Request completed in %v (avg: %v)", duration, time.Duration(int64(metrics.TotalDuration)/metrics.RequestCount))
 	}()
 
 	// Validate that the prompt is not empty
@@ -263,7 +276,7 @@ func handleCompletionTool(arguments CompletionArguments) (*mcpgolang.ToolRespons
 	logger.Printf("Starting completion with timeout of %d seconds", timeoutSeconds)
 
 	// Prepare command-line arguments for LLama.cpp using configuration
-	args := prepareLlamaArgs(arguments.Prompt)
+	args := prepareLlamaArgs(arguments)
 
 	// Execute the completion generation
 	output, err := GenerateSingleCompletionWithCancel(ctx, appArgs, args)
@@ -305,30 +318,128 @@ func handleCompletionTool(arguments CompletionArguments) (*mcpgolang.ToolRespons
 //   - prompt: The user-provided prompt text to include in the arguments
 //
 // Returns:
-//   - []string: Complete command-line arguments array for LLama.cpp
-func prepareLlamaArgs(prompt string) []string {
-	// Start with base arguments from environment configuration
-	args := LlamaCliStructToArgs(llamaCliArgs)
+// prepareLlamaArgs constructs command-line arguments for LLama.cpp execution
+// using both configuration defaults and optional runtime overrides
+func prepareLlamaArgs(arguments CompletionArguments) []string {
+	var args []string
 
-	// Filter out any existing --prompt arguments to avoid conflicts
-	filteredArgs := make([]string, 0, len(args))
-	skipNext := false
+	// Core Model & Performance Parameters
 
-	for _, arg := range args {
-		if skipNext {
-			skipNext = false
-			continue
-		}
-		if arg == "--prompt" {
-			skipNext = true // Skip the next argument (the old prompt value)
-			continue
-		}
-		filteredArgs = append(filteredArgs, arg)
+	// Model path - use override or default
+	if arguments.Model != "" {
+		args = append(args, llamaCliArgs.ModelCmd, arguments.Model)
+	} else if llamaCliArgs.ModelFullPathVal != "" {
+		args = append(args, llamaCliArgs.ModelCmd, llamaCliArgs.ModelFullPathVal)
 	}
 
-	// Add the new prompt as the final arguments
-	filteredArgs = append(filteredArgs, "--prompt", prompt)
+	// CPU threads - use override or default
+	if arguments.Threads > 0 {
+		args = append(args, llamaCliArgs.ThreadsCmd, fmt.Sprintf("%d", arguments.Threads))
+	} else if threadsVal, err := strconv.Atoi(llamaCliArgs.ThreadsVal); err == nil && threadsVal > 0 {
+		args = append(args, llamaCliArgs.ThreadsCmd, llamaCliArgs.ThreadsVal)
+	}
 
-	logger.Printf("Prepared llama args with %d parameters", len(filteredArgs))
-	return filteredArgs
+	// GPU layers - use override or default
+	if arguments.GpuLayers > 0 {
+		args = append(args, llamaCliArgs.GPULayersCmd, fmt.Sprintf("%d", arguments.GpuLayers))
+	} else if gpuLayersVal, err := strconv.Atoi(llamaCliArgs.GPULayersVal); err == nil && gpuLayersVal > 0 {
+		args = append(args, llamaCliArgs.GPULayersCmd, llamaCliArgs.GPULayersVal)
+	}
+
+	// Context size - use override or default
+	if arguments.CtxSize > 0 {
+		args = append(args, llamaCliArgs.CtxSizeCmd, fmt.Sprintf("%d", arguments.CtxSize))
+	} else if ctxSizeVal, err := strconv.Atoi(llamaCliArgs.CtxSizeVal); err == nil && ctxSizeVal > 0 {
+		args = append(args, llamaCliArgs.CtxSizeCmd, llamaCliArgs.CtxSizeVal)
+	}
+
+	// Batch size - use override or default
+	if arguments.BatchSize > 0 {
+		args = append(args, llamaCliArgs.BatchCmd, fmt.Sprintf("%d", arguments.BatchSize))
+	} else if batchVal, err := strconv.Atoi(llamaCliArgs.BatchCmdVal); err == nil && batchVal > 0 {
+		args = append(args, llamaCliArgs.BatchCmd, llamaCliArgs.BatchCmdVal)
+	}
+
+	// Generation Control Parameters
+
+	// Predict/tokens to generate - use override or default
+	if arguments.Predict > 0 {
+		args = append(args, llamaCliArgs.PredictCmd, fmt.Sprintf("%d", arguments.Predict))
+	} else if predictVal, err := strconv.Atoi(llamaCliArgs.PredictVal); err == nil && predictVal > 0 {
+		args = append(args, llamaCliArgs.PredictCmd, llamaCliArgs.PredictVal)
+	}
+
+	// Temperature - use override or default
+	if arguments.Temperature > 0 {
+		args = append(args, llamaCliArgs.TemperatureCmd, fmt.Sprintf("%.2f", arguments.Temperature))
+	} else if tempVal, err := strconv.ParseFloat(llamaCliArgs.TemperatureVal, 64); err == nil && tempVal > 0 {
+		args = append(args, llamaCliArgs.TemperatureCmd, llamaCliArgs.TemperatureVal)
+	}
+
+	// Top-K sampling - use override or default
+	if arguments.TopK > 0 {
+		args = append(args, llamaCliArgs.TopKCmd, fmt.Sprintf("%d", arguments.TopK))
+	} else if topKVal, err := strconv.Atoi(llamaCliArgs.TopKVal); err == nil && topKVal > 0 {
+		args = append(args, llamaCliArgs.TopKCmd, llamaCliArgs.TopKVal)
+	}
+
+	// Top-P sampling - use override or default
+	if arguments.TopP > 0 {
+		args = append(args, llamaCliArgs.TopPCmd, fmt.Sprintf("%.2f", arguments.TopP))
+	} else if topPVal, err := strconv.ParseFloat(llamaCliArgs.TopPVal, 64); err == nil && topPVal > 0 {
+		args = append(args, llamaCliArgs.TopPCmd, llamaCliArgs.TopPVal)
+	}
+
+	// Repeat penalty - use override or default
+	if arguments.RepeatPenalty > 0 {
+		args = append(args, llamaCliArgs.RepeatPenaltyCmd, fmt.Sprintf("%.2f", arguments.RepeatPenalty))
+	} else if repeatPenaltyVal, err := strconv.ParseFloat(llamaCliArgs.RepeatPenaltyVal, 64); err == nil && repeatPenaltyVal > 0 {
+		args = append(args, llamaCliArgs.RepeatPenaltyCmd, llamaCliArgs.RepeatPenaltyVal)
+	}
+
+	// Prompt file - use override or check if prompt should be from file
+	if arguments.PromptFile != "" {
+		args = append(args, llamaCliArgs.PromptFileCmd, arguments.PromptFile)
+	} else if arguments.Prompt != "" {
+		// Direct prompt input
+		args = append(args, llamaCliArgs.PromptCmd, arguments.Prompt)
+	}
+
+	// Log file - use override or default
+	if arguments.LogFile != "" {
+		args = append(args, llamaCliArgs.ModelLogFileCmd, arguments.LogFile)
+	} else if llamaCliArgs.ModelLogFileNameVal != "" {
+		args = append(args, llamaCliArgs.ModelLogFileCmd, llamaCliArgs.ModelLogFileNameVal)
+	}
+
+	// Add other configuration parameters from defaults
+	if llamaCliArgs.MultilineInputCmdEnabled {
+		args = append(args, llamaCliArgs.MultilineInputCmd)
+	}
+
+	if llamaCliArgs.FlashAttentionCmdEnabled {
+		args = append(args, llamaCliArgs.FlashAttentionCmd)
+	}
+
+	if llamaCliArgs.PromptCacheVal != "" {
+		args = append(args, llamaCliArgs.PromptCacheCmd, llamaCliArgs.PromptCacheVal)
+	}
+
+	if llamaCliArgs.NoDisplayPromptEnabled {
+		args = append(args, llamaCliArgs.NoDisplayPromptCmd)
+	}
+
+	if llamaCliArgs.EscapeNewLinesCmdEnabled {
+		args = append(args, llamaCliArgs.EscapeNewLinesCmd)
+	}
+
+	if llamaCliArgs.NoConversationCmdEnabled {
+		args = append(args, llamaCliArgs.NoConversationCmd)
+	}
+
+	if llamaCliArgs.NoContextShiftCmdEnabled {
+		args = append(args, llamaCliArgs.NoContextShiftCmd)
+	}
+
+	return args
 }

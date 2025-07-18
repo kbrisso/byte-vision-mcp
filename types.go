@@ -429,6 +429,25 @@ type LlamaCliArgs struct {
 	// Model splitting configuration for multi-GPU setups
 	SplitModeCmd    string `json:"SplitModeCmd"`    // Command flag for split mode (--split-mode)
 	SplitModeCmdVal string `json:"SplitModeCmdVal"` // Split mode value (layer, row, etc.)
+	Prompt          string `json:"prompt" description:"The prompt text to generate completion for"`
+
+	// Core Model & Performance Parameters
+	Model     string `json:"model,omitempty" description:"Model path (overrides default)"`
+	Threads   int    `json:"threads,omitempty" description:"CPU threads for generation"`
+	GpuLayers int    `json:"gpu_layers,omitempty" description:"GPU acceleration layers"`
+	CtxSize   int    `json:"ctx_size,omitempty" description:"Context window size"`
+	BatchSize int    `json:"batch_size,omitempty" description:"Batch processing size"`
+
+	// Generation Control Parameters
+	Predict       int     `json:"predict,omitempty" description:"Number of tokens to generate"`
+	Temperature   float64 `json:"temperature,omitempty" description:"Creativity/randomness control"`
+	TopK          int     `json:"top_k,omitempty" description:"Top-K sampling"`
+	TopP          float64 `json:"top_p,omitempty" description:"Top-P (nucleus) sampling"`
+	RepeatPenalty float64 `json:"repeat_penalty,omitempty" description:"Repetition penalty"`
+
+	// Input/Output Parameters
+	PromptFile string `json:"prompt_file,omitempty" description:"Prompt from file"`
+	LogFile    string `json:"log_file,omitempty" description:"Output logging"`
 }
 
 // DefaultAppArgs contains general application configuration parameters
